@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Heilpraktiker Lerntrainer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+  :root{
+    --bg:#F2F4EF;
+    --surface:#FFFFFF;
+    --ink:#1B2421;
+    --muted:#5E6B64;
+    --line:#DDE3DA;
+    --pine:#1F4D46;
+    --pine-soft:#E4ECE8;
+    --gold:#A8812E;
+    --correct:#2E7D5B;
+    --correct-bg:#E5F2EA;
+    --wrong:#B23A48;
+    --wrong-bg:#F7E6E8;
+    --radius:14px;
+    --shadow:0 1px 2px rgba(27,36,33,.06),0 6px 24px rgba(27,36,33,.06);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Inter',system-ui,sans-serif;
+    background:var(--bg);color:var(--ink);
+    line-height:1.5;-webkit-font-smoothing:antialiased;
+    padding-bottom:40px;
+  }
+  .wrap{max-width:680px;margin:0 auto;padding:0 16px}
+  header{
+    padding:28px 0 18px;text-align:center;
+  }
+  .eyebrow{
+    font-size:12px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--gold);font-weight:600;margin-bottom:6px;
+  }
+  h1{
+    font-family:'Fraunces',serif;font-weight:500;font-size:30px;
+    letter-spacing:-.01em;line-height:1.1;color:var(--pine);
+  }
+  .sub{color:var(--muted);font-size:14px;margin-top:8px}
+  nav{
+    display:flex;gap:4px;background:var(--surface);border:1px solid var(--line);
+    border-radius:999px;padding:4px;margin:18px auto 22px;width:fit-content;
+    box-shadow:var(--shadow);
+  }
+  nav button{
+    border:0;background:transparent;font-family:inherit;font-size:14px;
+    font-weight:500;color:var(--muted);padding:9px 16px;border-radius:999px;
+    cursor:pointer;transition:.15s;white-space:nowrap;
+  }
+  nav button.active{background:var(--pine);color:#fff}
+  .card{
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:20px;box-shadow:var(--shadow);margin-bottom:16px;
+  }
+  .card h2{font-family:'Fraunces',serif;font-weight:500;font-size:19px;margin-bottom:4px}
+  .card p.lead{color:var(--muted);font-size:14px;margin-bottom:16px}
+  label.field{display:block;font-size:13px;font-weight:600;margin-bottom:7px;color:var(--ink)}
+  textarea{
+    width:100%;border:1px solid var(--line);border-radius:10px;padding:12px;
+    font-family:inherit;font-size:14px;resize:vertical;min-height:120px;background:#FBFCFA;
+  }
+  textarea:focus,select:focus{outline:2px solid var(--pine-soft);border-color:var(--pine)}
+  .drop{
+    border:1.5px dashed var(--line);border-radius:10px;padding:22px;text-align:center;
+    color:var(--muted);font-size:14px;cursor:pointer;transition:.15s;background:#FBFCFA;
+  }
+  .drop:hover{border-color:var(--pine);color:var(--pine)}
+  .drop strong{color:var(--pine)}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px}
+  select{
+    font-family:inherit;font-size:14px;padding:9px 12px;border:1px solid var(--line);
+    border-radius:10px;background:#fff;
+  }
+  button.btn{
+    font-family:inherit;font-size:14px;font-weight:600;border:0;cursor:pointer;
+    padding:11px 18px;border-radius:10px;transition:.15s;
+  }
+  .btn-primary{background:var(--pine);color:#fff}
+  .btn-primary:hover{background:#163A34}
+  .btn-primary:disabled{opacity:.5;cursor:default}
+  .btn-ghost{background:var(--pine-soft);color:var(--pine)}
+  .btn-ghost:hover{background:#D5E2DC}
+  .doc-chip{
+    display:inline-flex;align-items:center;gap:8px;background:var(--pine-soft);
+    color:var(--pine);font-size:13px;font-weight:500;padding:6px 12px;border-radius:999px;margin:4px 4px 0 0;
+  }
+  .doc-chip span.x{cursor:pointer;font-weight:700;opacity:.6}
+  .doc-chip span.x:hover{opacity:1}
+  .muted-note{font-size:12px;color:var(--muted);margin-top:10px}
+  .empty{text-align:center;color:var(--muted);padding:30px 10px;font-size:14px}
+  .empty .big{font-family:'Fraunces',serif;font-size:38px;color:var(--line);margin-bottom:8px}
+  /* quiz */
+  .q-num{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:8px}
+  .q-text{font-family:'Fraunces',serif;font-size:19px;font-weight:500;margin-bottom:16px;line-height:1.35}
+  .opt{
+    display:block;width:100%;text-align:left;border:1px solid var(--line);background:#fff;
+    border-radius:10px;padding:13px 14px;margin-bottom:9px;font-family:inherit;font-size:14px;
+    cursor:pointer;transition:.12s;color:var(--ink);
+  }
+  .opt:hover:not(:disabled){border-color:var(--pine);background:#FBFCFA}
+  .opt.correct{border-color:var(--correct);background:var(--correct-bg);color:#1d5a40;font-weight:500}
+  .opt.wrong{border-color:var(--wrong);background:var(--wrong-bg);color:#8a2c37;font-weight:500}
+  .opt:disabled{cursor:default}
+  .opt .letter{display:inline-block;width:22px;font-weight:600;color:var(--muted)}
+  .explain{
+    background:var(--pine-soft);border-radius:10px;padding:13px 14px;font-size:14px;
+    color:#22433c;margin-top:6px;
+  }
+  .explain b{color:var(--pine)}
+  .quiz-foot{display:flex;justify-content:space-between;align-items:center;margin-top:18px}
+  .progress{height:6px;background:var(--line);border-radius:999px;overflow:hidden;margin-bottom:18px}
+  .progress i{display:block;height:100%;background:var(--pine);transition:width .3s}
+  .score-big{font-family:'Fraunces',serif;font-size:46px;color:var(--pine);text-align:center}
+  .score-lbl{text-align:center;color:var(--muted);margin-bottom:18px}
+  /* plan */
+  .phase{border-left:3px solid var(--pine);padding:2px 0 2px 16px;margin-bottom:18px}
+  .phase .ph-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+  .phase h3{font-family:'Fraunces',serif;font-weight:500;font-size:17px;color:var(--pine)}
+  .phase .dauer{font-size:12px;color:var(--gold);font-weight:600;white-space:nowrap}
+  .phase ul{margin:8px 0 0 0;padding-left:18px}
+  .phase li{font-size:14px;margin-bottom:4px;color:var(--ink)}
+  .phase .ziel{font-size:13px;color:var(--muted);margin-top:8px;font-style:italic}
+  .spinner{
+    display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.4);
+    border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:-3px;margin-right:8px;
+  }
+  .spinner.dark{border-color:var(--pine-soft);border-top-color:var(--pine)}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .hidden{display:none}
+  .err{background:var(--wrong-bg);color:#8a2c37;border-radius:10px;padding:12px;font-size:13px;margin-top:12px}
+  .ready-banner{border-radius:10px;padding:11px 13px;font-size:13px;font-weight:500;margin-bottom:4px}
+  .ready-ok{background:var(--correct-bg);color:#1d5a40}
+  .ready-empty{background:#F0F1EE;color:var(--muted);border-radius:10px;padding:11px 13px;font-size:13px;margin-bottom:4px}
+  .ready-warn{background:#FBF1E3;color:#8a6a1f}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Heilpraktiker · Prüfungsvorbereitung</div>
+    <h1>Dein Lerntrainer</h1>
+    <p class="sub">Skripte rein, Prüfungsfragen raus.</p>
+  </header>
+
+  <nav>
+    <button data-tab="quellen" class="active">Skripte &amp; Fragen</button>
+    <button data-tab="quiz">Quiz</button>
+    <button data-tab="plan">Lernplan</button>
+  </nav>
+
+  <!-- TAB: QUELLEN -->
+  <section id="tab-quellen">
+    <div class="card">
+      <h2>Lernmaterial hinzufügen</h2>
+      <p class="lead">Lade ein PDF hoch oder füge Text aus deinem Skript ein. Beides geht auch mehrfach.</p>
+      <div class="drop" id="drop">
+        <strong>PDF auswählen</strong> oder hierher ziehen
+        <input type="file" id="file" accept="application/pdf" multiple class="hidden">
+      </div>
+      <div style="margin-top:14px">
+        <label class="field" for="paste">…oder Text einfügen</label>
+        <textarea id="paste" placeholder="Skript-Text hier einfügen…"></textarea>
+        <button class="btn btn-ghost" id="addText" style="margin-top:10px">Text übernehmen</button>
+      </div>
+      <div id="docList" style="margin-top:14px"></div>
+    </div>
+
+    <div class="card">
+      <h2>Fragen generieren</h2>
+      <p class="lead">Wähle Anzahl und Niveau, dann auf den Knopf. Voraussetzung: oben ist Material geladen.</p>
+      <div id="readyBanner" class="ready-empty">Noch kein Material geladen.</div>
+      <div class="row">
+        <select id="count">
+          <option value="5">5 Fragen</option>
+          <option value="3">3 Fragen</option>
+          <option value="8">8 Fragen</option>
+        </select>
+        <select id="level">
+          <option value="gemischt">Gemischt</option>
+          <option value="leicht">Eher leicht</option>
+          <option value="schwer">Prüfungsniveau</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" id="gen" style="width:100%;margin-top:14px;padding:14px;font-size:15px">
+        Fragen erstellen
+      </button>
+      <div id="genStatus" class="muted-note"></div>
+      <div id="toQuizWrap" class="hidden" style="margin-top:12px">
+        <button class="btn btn-ghost" id="toQuiz" style="width:100%">Zum Quiz →</button>
+      </div>
+      <div id="genErr"></div>
+    </div>
+  </section>
+
+  <!-- TAB: QUIZ -->
+  <section id="tab-quiz" class="hidden">
+    <div class="card" id="quizCard">
+      <div class="empty" id="quizEmpty">
+        <div class="big">?</div>
+        Noch keine Fragen da. Erstelle erst welche unter „Skripte &amp; Fragen".
+      </div>
+      <div id="quizLive" class="hidden">
+        <div class="progress"><i id="prog"></i></div>
+        <div class="q-num" id="qNum"></div>
+        <div class="q-text" id="qText"></div>
+        <div id="opts"></div>
+        <div id="explainBox"></div>
+        <div class="quiz-foot">
+          <span class="muted-note" id="runScore"></span>
+          <button class="btn btn-primary hidden" id="next">Weiter</button>
+        </div>
+      </div>
+      <div id="quizDone" class="hidden">
+        <div class="score-big" id="finalScore"></div>
+        <div class="score-lbl" id="finalLbl"></div>
+        <div style="text-align:center">
+          <button class="btn btn-ghost" id="retry">Nochmal üben</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB: PLAN -->
+  <section id="tab-plan" class="hidden">
+    <div class="card">
+      <h2>Lernplan erstellen</h2>
+      <p class="lead">Gib dein Thema und deine Zeit an – du bekommst einen strukturierten Plan.</p>
+      <label class="field" for="planTopic">Themengebiet</label>
+      <textarea id="planTopic" style="min-height:70px" placeholder="z. B. Herz-Kreislauf-System, Notfälle, Infektionskrankheiten…"></textarea>
+      <div class="row">
+        <select id="weeks">
+          <option value="4">4 Wochen</option>
+          <option value="8">8 Wochen</option>
+          <option value="12">12 Wochen</option>
+        </select>
+        <select id="hours">
+          <option value="5">5 Std/Woche</option>
+          <option value="10">10 Std/Woche</option>
+          <option value="20">20 Std/Woche</option>
+        </select>
+        <button class="btn btn-primary" id="genPlan">Plan erstellen</button>
+      </div>
+      <div id="planStatus" class="muted-note"></div>
+      <div id="planErr"></div>
+    </div>
+    <div id="planOut"></div>
+  </section>
+</div>
+
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+// ---------- State ----------
+const state = { docs: [], questions: [], quiz: null };
+
+// ---------- Tabs ----------
+document.querySelectorAll('nav button').forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    ['quellen','quiz','plan'].forEach(t=>document.getElementById('tab-'+t).classList.add('hidden'));
+    document.getElementById('tab-'+b.dataset.tab).classList.remove('hidden');
+    if(b.dataset.tab==='quiz') renderQuizState();
+  };
+});
+
+// ---------- Doc handling ----------
+const drop=document.getElementById('drop'), fileInput=document.getElementById('file');
+drop.onclick=()=>fileInput.click();
+drop.ondragover=e=>{e.preventDefault();drop.style.borderColor='var(--pine)';};
+drop.ondragleave=()=>drop.style.borderColor='';
+drop.ondrop=e=>{e.preventDefault();drop.style.borderColor='';handleFiles(e.dataTransfer.files);};
+fileInput.onchange=()=>handleFiles(fileInput.files);
+
+async function handleFiles(files){
+  for(const f of files){
+    if(f.type!=='application/pdf'){ alert(f.name+' ist kein PDF.'); continue; }
+    drop.innerHTML='<span class="spinner dark"></span> '+f.name+' wird gelesen…';
+    try{
+      const text=await extractPdf(f);
+      if(text.length<100){
+        alert('„'+f.name+'" enthält kaum lesbaren Text.\n\nWahrscheinlich ist es ein eingescanntes PDF (nur Bilder). Daraus kann die KI keine Fragen bauen. Tipp: Text aus dem Skript markieren und unten ins Textfeld einfügen.');
+      }
+      state.docs.push({name:f.name, text});
+    }catch(err){
+      alert('Konnte „'+f.name+'" nicht lesen. Vielleicht ein gescanntes PDF ohne Text?');
+    }
+  }
+  drop.innerHTML='<strong>PDF auswählen</strong> oder hierher ziehen';
+  renderDocs();
+}
+
+async function extractPdf(file){
+  const buf=await file.arrayBuffer();
+  const pdf=await pdfjsLib.getDocument({data:buf}).promise;
+  let out='';
+  for(let i=1;i<=pdf.numPages;i++){
+    const page=await pdf.getPage(i);
+    const c=await page.getTextContent();
+    out+=c.items.map(it=>it.str).join(' ')+'\n';
+  }
+  return out.trim();
+}
+
+document.getElementById('addText').onclick=()=>{
+  const t=document.getElementById('paste').value.trim();
+  if(t.length<20){alert('Bitte etwas mehr Text einfügen.');return;}
+  state.docs.push({name:'Eingefügter Text', text:t});
+  document.getElementById('paste').value='';
+  renderDocs();
+};
+
+function renderDocs(){
+  const el=document.getElementById('docList');
+  el.innerHTML=state.docs.map((d,i)=>{
+    const k=(d.text.length/1000).toFixed(1);
+    return `<span class="doc-chip">${d.name} · ${k}k Zeichen <span class="x" onclick="removeDoc(${i})">✕</span></span>`;
+  }).join('');
+  updateReady();
+}
+function updateReady(){
+  const b=document.getElementById('readyBanner');
+  const chars=allText().length;
+  if(chars<100){
+    b.className='ready-empty';
+    b.textContent='Noch kein Material geladen.';
+  }else{
+    b.className='ready-ok ready-banner';
+    b.textContent='✓ Bereit: '+(chars/1000).toFixed(1)+'k Zeichen aus '+state.docs.length+' Quelle(n).';
+  }
+}
+window.removeDoc=i=>{state.docs.splice(i,1);renderDocs();};
+
+function allText(limit){
+  let t=state.docs.map(d=>d.text).join('\n\n');
+  return limit && t.length>limit ? t.slice(0,limit) : t;
+}
+
+// ---------- Claude API ----------
+async function callClaude(system, user){
+  // Live auf Netlify: über die eigene, sichere Funktion (Schlüssel bleibt versteckt).
+  try{
+    const res=await fetch('/.netlify/functions/generate',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({system, user})
+    });
+    if(res.ok){ const d=await res.json(); if(d.text) return d.text.trim(); }
+  }catch(e){ /* Funktion (noch) nicht da -> Vorschau-Fallback unten */ }
+
+  // Fallback: funktioniert NUR in der Vorschau hier in Claude.
+  const res2=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      model:'claude-sonnet-4-6',
+      max_tokens:1000,
+      system:system,
+      messages:[{role:'user',content:user}]
+    })
+  });
+  if(!res2.ok) throw new Error('API '+res2.status);
+  const data=await res2.json();
+  return data.content.map(b=>b.type==='text'?b.text:'').join('').trim();
+}
+
+function parseJsonLoose(txt){
+  let s=txt.replace(/```json/gi,'').replace(/```/g,'').trim();
+  const start=s.indexOf('['), end=s.lastIndexOf(']');
+  if(start!==-1 && end!==-1) s=s.slice(start,end+1);
+  try{ return JSON.parse(s); }
+  catch(e){
+    // versuche bis zum letzten vollständigen Objekt zu retten
+    const last=s.lastIndexOf('}');
+    if(last!==-1){
+      try{ return JSON.parse(s.slice(0,last+1)+']'); }catch(_){}
+    }
+    throw e;
+  }
+}
+
+// ---------- Generate questions ----------
+document.getElementById('gen').onclick=async()=>{
+  const status=document.getElementById('genStatus'), errBox=document.getElementById('genErr');
+  errBox.innerHTML='';
+  if(!state.docs.length){errBox.innerHTML='<div class="err">Füge erst Lernmaterial hinzu.</div>';return;}
+  const n=document.getElementById('count').value;
+  const lvl=document.getElementById('level').value;
+  const btn=document.getElementById('gen');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span>Erstelle…';
+  status.textContent='';
+  const lvlTxt={leicht:'eher einfaches Niveau',schwer:'anspruchsvolles Prüfungsniveau',gemischt:'gemischtes Niveau'}[lvl];
+  const system='Du bist Experte für die amtliche deutsche Heilpraktiker-Überprüfung. Du erstellst Multiple-Choice-Fragen AUSSCHLIESSLICH auf Basis des gelieferten Lernmaterials, fachlich korrekt und präzise. Antworte NUR mit gültigem JSON-Array, ohne Markdown, ohne Backticks, ohne Einleitung.';
+  const user=`Erstelle ${n} Multiple-Choice-Fragen (${lvlTxt}) aus diesem Lernmaterial.
+Jede Frage hat genau 4 Antwortmöglichkeiten und genau eine richtige.
+Halte die Erklärung knapp (max 1 Satz).
+Format: [{"frage":"...","optionen":["A","B","C","D"],"richtig":0,"erklaerung":"..."}]
+
+LERNMATERIAL:
+${allText(5000)}`;
+  try{
+    const raw=await callClaude(system,user);
+    const qs=parseJsonLoose(raw).filter(q=>q.frage&&Array.isArray(q.optionen)&&q.optionen.length===4);
+    if(!qs.length) throw new Error('leer');
+    state.questions=state.questions.concat(qs);
+    status.textContent=`✓ ${qs.length} Fragen erstellt. Insgesamt ${state.questions.length}.`;
+    document.getElementById('toQuizWrap').classList.remove('hidden');
+  }catch(e){
+    errBox.innerHTML='<div class="err">Das hat nicht geklappt. Versuch es mit weniger Fragen oder kürzerem Text nochmal.</div>';
+  }finally{
+    btn.disabled=false; btn.textContent='Fragen erstellen';
+  }
+};
+
+document.getElementById('toQuiz').onclick=()=>{
+  document.querySelector('nav button[data-tab="quiz"]').click();
+};
+
+// ---------- Quiz ----------
+function renderQuizState(){
+  const empty=document.getElementById('quizEmpty'),
+        live=document.getElementById('quizLive'),
+        done=document.getElementById('quizDone');
+  if(!state.questions.length){
+    empty.classList.remove('hidden');live.classList.add('hidden');done.classList.add('hidden');
+    return;
+  }
+  if(!state.quiz) startQuiz();
+}
+function startQuiz(){
+  state.quiz={i:0,correct:0,answered:false};
+  document.getElementById('quizEmpty').classList.add('hidden');
+  document.getElementById('quizDone').classList.add('hidden');
+  document.getElementById('quizLive').classList.remove('hidden');
+  showQ();
+}
+function showQ(){
+  const q=state.questions[state.quiz.i];
+  state.quiz.answered=false;
+  document.getElementById('prog').style.width=(state.quiz.i/state.questions.length*100)+'%';
+  document.getElementById('qNum').textContent=`Frage ${state.quiz.i+1} von ${state.questions.length}`;
+  document.getElementById('qText').textContent=q.frage;
+  document.getElementById('explainBox').innerHTML='';
+  document.getElementById('next').classList.add('hidden');
+  document.getElementById('runScore').textContent=`${state.quiz.correct} richtig`;
+  const letters=['A','B','C','D'];
+  const opts=document.getElementById('opts');
+  opts.innerHTML='';
+  q.optionen.forEach((o,idx)=>{
+    const b=document.createElement('button');
+    b.className='opt';
+    b.innerHTML=`<span class="letter">${letters[idx]}</span>${o}`;
+    b.onclick=()=>answer(idx,b);
+    opts.appendChild(b);
+  });
+}
+function answer(idx,btn){
+  if(state.quiz.answered) return;
+  state.quiz.answered=true;
+  const q=state.questions[state.quiz.i];
+  const buttons=document.querySelectorAll('#opts .opt');
+  buttons.forEach((b,i)=>{
+    b.disabled=true;
+    if(i===q.richtig) b.classList.add('correct');
+    if(i===idx && idx!==q.richtig) b.classList.add('wrong');
+  });
+  if(idx===q.richtig) state.quiz.correct++;
+  document.getElementById('runScore').textContent=`${state.quiz.correct} richtig`;
+  document.getElementById('explainBox').innerHTML=
+    `<div class="explain"><b>${idx===q.richtig?'Richtig.':'Erklärung.'}</b> ${q.erklaerung||''}</div>`;
+  const next=document.getElementById('next');
+  next.classList.remove('hidden');
+  next.textContent=state.quiz.i+1>=state.questions.length?'Auswertung':'Weiter';
+}
+document.getElementById('next').onclick=()=>{
+  if(state.quiz.i+1>=state.questions.length){ finishQuiz(); return; }
+  state.quiz.i++; showQ();
+};
+function finishQuiz(){
+  document.getElementById('quizLive').classList.add('hidden');
+  document.getElementById('quizDone').classList.remove('hidden');
+  const pct=Math.round(state.quiz.correct/state.questions.length*100);
+  document.getElementById('finalScore').textContent=pct+'%';
+  document.getElementById('finalLbl').textContent=
+    `${state.quiz.correct} von ${state.questions.length} richtig`+
+    (pct>=75?' — stark!':pct>=50?' — auf gutem Weg.':' — dranbleiben.');
+}
+document.getElementById('retry').onclick=startQuiz;
+
+// ---------- Lernplan ----------
+document.getElementById('genPlan').onclick=async()=>{
+  const topic=document.getElementById('planTopic').value.trim();
+  const errBox=document.getElementById('planErr'), status=document.getElementById('planStatus');
+  errBox.innerHTML='';
+  if(!topic){errBox.innerHTML='<div class="err">Bitte ein Themengebiet eingeben.</div>';return;}
+  const weeks=document.getElementById('weeks').value, hours=document.getElementById('hours').value;
+  const btn=document.getElementById('genPlan');
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span>Erstelle…';
+  const system='Du bist Lerncoach für die deutsche Heilpraktiker-Prüfung. Erstelle einen realistischen, strukturierten Lernplan. Antworte NUR mit gültigem JSON-Array, ohne Markdown, ohne Backticks.';
+  const user=`Erstelle einen Lernplan für die Heilpraktiker-Prüfung.
+Thema: ${topic}
+Zeitraum: ${weeks} Wochen, ca. ${hours} Stunden pro Woche.
+Teile ihn in sinnvolle Phasen. Halte die Inhalte knapp.
+Format: [{"titel":"Phase ...","dauer":"Woche 1-2","themen":["...","..."],"ziel":"..."}]`;
+  try{
+    const raw=await callClaude(system,user);
+    const plan=parseJsonLoose(raw);
+    renderPlan(plan);
+    status.textContent='';
+  }catch(e){
+    errBox.innerHTML='<div class="err">Das hat nicht geklappt. Bitte nochmal versuchen.</div>';
+  }finally{
+    btn.disabled=false;btn.textContent='Plan erstellen';
+  }
+};
+function renderPlan(plan){
+  const out=document.getElementById('planOut');
+  out.innerHTML='<div class="card"><h2>Dein Lernplan</h2>'+
+    plan.map(p=>`
+      <div class="phase">
+        <div class="ph-head"><h3>${p.titel||''}</h3><span class="dauer">${p.dauer||''}</span></div>
+        <ul>${(p.themen||[]).map(t=>`<li>${t}</li>`).join('')}</ul>
+        ${p.ziel?`<div class="ziel">Ziel: ${p.ziel}</div>`:''}
+      </div>`).join('')+'</div>';
+}
+</script>
+</body>
+</html>
