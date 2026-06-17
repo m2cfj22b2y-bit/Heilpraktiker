@@ -206,7 +206,7 @@
 </div>
 
 <script>
-pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+if(window.pdfjsLib){pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';}
 
 const state={docs:[],questions:[],status:{},daily:null,quiz:null};
 const LS='lerntrainer_v2';
@@ -267,7 +267,7 @@ async function callClaude(system,user){
   const r2=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1500,system,messages:[{role:'user',content:user}]})});
   if(!r2.ok)throw new Error('API '+r2.status);const data=await r2.json();return data.content.map(b=>b.type==='text'?b.text:'').join('').trim();
 }
-function parseLoose(txt){let s=txt.replace(/```json/gi,'').replace(/```/g,'').trim();const a=s.indexOf('['),b=s.lastIndexOf(']');if(a!==-1&&b!==-1)s=s.slice(a,b+1);try{return JSON.parse(s);}catch(e){const l=s.lastIndexOf('}');if(l!==-1){try{return JSON.parse(s.slice(0,l+1)+']');}catch(_){}}throw e;}
+function parseLoose(txt){let s=txt.replace(/```json/gi,'').replace(/```/g,'').trim();const a=s.indexOf('['),b=s.lastIndexOf(']');if(a!==-1&&b!==-1)s=s.slice(a,b+1);try{return JSON.parse(s);}catch(e){const l=s.lastIndexOf('}');if(l!==-1){try{return JSON.parse(s.slice(0,l+1)+']');}catch(_){}}throw e;}}
 
 async function genBatch(sourceText,need,level,useGeneral,note){
   const lvl={leicht:'eher einfaches Niveau',schwer:'anspruchsvolles Prüfungsniveau',gemischt:'gemischtes Niveau'}[level||'gemischt'];
